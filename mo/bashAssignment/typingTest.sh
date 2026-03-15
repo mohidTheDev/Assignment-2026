@@ -74,20 +74,44 @@ while true; do
         noOfHard=$(( noOfWords * hardPercent / 100))
 
         selectedWords=()
-
+        lastFiveIndices=()
         for (( i=0; i<noOfEasy; i++ )); do
-                n=$(( RANDOM % ${#easyWords[@]} ))
-                selectedWords+=("${easyWords[$n]}")
+                while true; do
+                        n=$(( RANDOM % ${#easyWords[@]} ))
+                        if printf "%s\n" "${lastFiveIndices[@]}" | grep -q -x "$n"; then
+                                continue
+                        fi
+                        selectedWords+=("${easyWords[$n]}")
+                        lastFiveIndices=("${lastFiveIndices[@]:1}")
+                        lastFiveIndices+="$n"
+                        break
+                done
         done
-
+        lastFiveIndices=()
         for (( i=0; i<noOfMed; i++ )); do
-                n=$(( RANDOM % ${#medWords[@]} ))
-                selectedWords+=("${medWords[$n]}")
+                while true; do
+                        n=$(( RANDOM % ${#medWords[@]} ))
+                        if printf "%s\n" "${lastFiveIndices[@]}" | grep -q -x "$n"; then
+                                continue
+                        fi
+                        selectedWords+=("${medWords[$n]}")
+                        lastFiveIndices=("${lastFiveIndices[@]:1}")
+                        lastFiveIndices+="$n"
+                        break
+                done
         done
-
+        lastFiveIndices=()
         for (( i=0; i<noOfHard; i++ )); do
-                n=$(( RANDOM % ${#hardWords[@]} ))
-                selectedWords+=("${hardWords[$n]}")
+                while true; do
+                        n=$(( RANDOM % ${#hardWords[@]} ))
+                        if printf "%s\n" "${lastFiveIndices[@]}" | grep -q -x "$n"; then
+                                continue
+                        fi
+                        selectedWords+=("${hardWords[$n]}")
+                        lastFiveIndices=("${lastFiveIndices[@]:1}")
+                        lastFiveIndices+="$n"
+                        break
+                done
         done
 
 	selectedWords=($(shuf -e "${selectedWords[@]}"))
