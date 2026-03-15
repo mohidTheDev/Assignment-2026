@@ -96,7 +96,7 @@ while true; do
                 selectedWords+=("${hardWords[$n]}")
         done
 
-        mapfile -t selectedWords < <(shuf -e "${selectedWords[@]}")
+	selectedWords=($(shuf -e "${selectedWords[@]}"))
 
         targetText="${selectedWords[*]}"
 
@@ -127,7 +127,7 @@ while true; do
                                         break
                                 fi
                         fi
-                        IFS= read -r -s -n 1 -t 0.5 char
+                        IFS= read -r -s -n 1 -t 1 char
                 else
                         IFS= read -r -s -n 1 char
 
