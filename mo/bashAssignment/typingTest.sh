@@ -1,21 +1,15 @@
 #!/bin/bash
 
 if ! command -v "tput" &> /dev/null; then
-    sudo apt-get update
-    sudo apt-get install -y ncurses-bin
-
-    if ! command -v "tput" &> /dev/null; then
-        exit 1
-    fi
+	echo "Error: command tput not found"
+	echo "Install ncurses-bin"
+	exit 1
 fi
 
 if ! command -v "shuf" &> /dev/null; then
-    sudo apt-get update
-    sudo apt-get install -y coreutils
-
-    if ! command -v "shuf" &> /dev/null; then
-        exit 1
-    fi
+	echo "Error: command shuf not found"
+	echo "Install coreutils"
+	exit 1
 fi
 
 easyWords=(
