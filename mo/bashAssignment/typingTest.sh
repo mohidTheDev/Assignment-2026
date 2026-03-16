@@ -30,6 +30,32 @@ hardWords=(
         "knapsack" "exaggerated" "syzygy" "mnemonic" "notwithstanding"
 )
 
+
+pickUniqueWord()
+{
+    local -n wordArray=$1
+    local -n selectedWords=$2
+    local n
+
+    while true; do
+        n=$(( RANDOM % ${#wordArray[@]} ))
+        if printf "%s\n" "${lastFiveIndices[@]}" | grep -q -x "$n"; then
+            continue
+        fi
+        selectedWords+=("${wordArray[$n]}")
+
+	if [ ${#lastFiveIndices[@]} -ge 5 ]; then
+            lastFiveIndices=("${lastFiveIndices[@]:1}")
+        fi
+        lastFiveIndices+=("$n")
+
+        break
+    done
+}
+
+
+
+
 while true; do
         clear
 
@@ -62,7 +88,7 @@ while true; do
         fi
 
         timeBasedTestTime=30
-        read -p "Time based Test (t) (30 seconds) ? or Completion based test (c) ?" testType
+        read -p "Time based Test (t) (30 seconds) ? or Completion based test (c) ?: " testType
 
         noOfWords=$((10 + RANDOM % 6))
         if [[ "$testType" == "t" || "$testType" == "T" ]]; then
@@ -74,47 +100,46 @@ while true; do
         noOfHard=$(( noOfWords * hardPercent / 100))
 
         selectedWords=()
-        lastFiveIndices=()
+	difficultyOrder=()
+        easySelectedWords=()
+	lastFiveIndices=()
         for (( i=0; i<noOfEasy; i++ )); do
-                while true; do
-                        n=$(( RANDOM % ${#easyWords[@]} ))
-                        if printf "%s\n" "${lastFiveIndices[@]}" | grep -q -x "$n"; then
-                                continue
-                        fi
-                        selectedWords+=("${easyWords[$n]}")
-                        lastFiveIndices=("${lastFiveIndices[@]:1}")
-                        lastFiveIndices+="$n"
-                        break
-                done
+		difficultyOrder+=("e")
+		pickUniqueWord easyWords easySelectedWords
         done
+	medSelectedWords=()
         lastFiveIndices=()
         for (( i=0; i<noOfMed; i++ )); do
-                while true; do
-                        n=$(( RANDOM % ${#medWords[@]} ))
-                        if printf "%s\n" "${lastFiveIndices[@]}" | grep -q -x "$n"; then
-                                continue
-                        fi
-                        selectedWords+=("${medWords[$n]}")
-                        lastFiveIndices=("${lastFiveIndices[@]:1}")
-                        lastFiveIndices+="$n"
-                        break
-                done
+		difficultyOrder+=("m")
+		pickUniqueWord medWords medSelectedWords
         done
+	hardSelectedWords=()
         lastFiveIndices=()
         for (( i=0; i<noOfHard; i++ )); do
-                while true; do
-                        n=$(( RANDOM % ${#hardWords[@]} ))
-                        if printf "%s\n" "${lastFiveIndices[@]}" | grep -q -x "$n"; then
-                                continue
-                        fi
-                        selectedWords+=("${hardWords[$n]}")
-                        lastFiveIndices=("${lastFiveIndices[@]:1}")
-                        lastFiveIndices+="$n"
-                        break
-                done
+                difficultyOrder+=("h")
+		pickUniqueWord hardWords hardSelectedWords
         done
 
-	selectedWords=($(shuf -e "${selectedWords[@]}"))
+	difficultyOrder=($(shuf -e "${difficultyOrder[@]}"))
+
+	ne=0
+	nm=0
+	nh=0
+	nd=0
+	while [[ $ne -lt $noOfEasy || $nm -lt $noOfMed || $nh -lt $noOfHard ]]; do
+		if [[ "${difficultyOrder[nd]}" == "e" ]]; then
+			selectedWords+=("${easySelectedWords[ne]}")
+			((ne++))
+		elif [[ "${difficultyOrder[nd]}" == "m" ]]; then
+			selectedWords+=("${medSelectedWords[nm]}")
+			((nm++))
+		else
+			selectedWords+=("${hardSelectedWords[nh]}")
+			((nh++))
+		fi
+
+		((nd++))
+	done
 
         targetText="${selectedWords[*]}"
 
