@@ -1,15 +1,15 @@
 #!/bin/bash
 
 if ! command -v "tput" &> /dev/null; then
-	echo "Error: command tput not found"
-	echo "Install ncurses-bin"
-	exit 1
+        echo "Error: command tput not found"
+        echo "Install ncurses-bin"
+        exit 1
 fi
 
 if ! command -v "shuf" &> /dev/null; then
-	echo "Error: command shuf not found"
-	echo "Install coreutils"
-	exit 1
+        echo "Error: command shuf not found"
+        echo "Install coreutils"
+        exit 1
 fi
 
 easyWords=(
@@ -31,6 +31,13 @@ hardWords=(
 )
 
 
+colourReset="\033[0m"
+colourGrey="\033[2m"
+colourBoldGreen="\033[1;32m"
+colourBoldRed="\033[1;31m"
+colourBgRed="\033[41m"
+
+
 pickUniqueWord()
 {
     local -n wordArray=$1
@@ -44,7 +51,7 @@ pickUniqueWord()
         fi
         selectedWords+=("${wordArray[$n]}")
 
-	if [ ${#lastFiveIndices[@]} -ge 5 ]; then
+        if [ ${#lastFiveIndices[@]} -ge 5 ]; then
             lastFiveIndices=("${lastFiveIndices[@]:1}")
         fi
         lastFiveIndices+=("$n")
@@ -100,46 +107,46 @@ while true; do
         noOfHard=$(( noOfWords * hardPercent / 100))
 
         selectedWords=()
-	difficultyOrder=()
+        difficultyOrder=()
         easySelectedWords=()
-	lastFiveIndices=()
+        lastFiveIndices=()
         for (( i=0; i<noOfEasy; i++ )); do
-		difficultyOrder+=("e")
-		pickUniqueWord easyWords easySelectedWords
+                difficultyOrder+=("e")
+                pickUniqueWord easyWords easySelectedWords
         done
-	medSelectedWords=()
+        medSelectedWords=()
         lastFiveIndices=()
         for (( i=0; i<noOfMed; i++ )); do
-		difficultyOrder+=("m")
-		pickUniqueWord medWords medSelectedWords
-        done
-	hardSelectedWords=()
+                difficultyOrder+=("m")
+                pickUniqueWord medWords medSelectedWords
+	done
+        hardSelectedWords=()
         lastFiveIndices=()
         for (( i=0; i<noOfHard; i++ )); do
                 difficultyOrder+=("h")
-		pickUniqueWord hardWords hardSelectedWords
+                pickUniqueWord hardWords hardSelectedWords
         done
 
-	difficultyOrder=($(shuf -e "${difficultyOrder[@]}"))
+        difficultyOrder=($(shuf -e "${difficultyOrder[@]}"))
 
-	ne=0
-	nm=0
-	nh=0
-	nd=0
-	while [[ $ne -lt $noOfEasy || $nm -lt $noOfMed || $nh -lt $noOfHard ]]; do
-		if [[ "${difficultyOrder[nd]}" == "e" ]]; then
-			selectedWords+=("${easySelectedWords[ne]}")
-			((ne++))
-		elif [[ "${difficultyOrder[nd]}" == "m" ]]; then
-			selectedWords+=("${medSelectedWords[nm]}")
-			((nm++))
-		else
-			selectedWords+=("${hardSelectedWords[nh]}")
-			((nh++))
-		fi
+        ne=0
+        nm=0
+        nh=0
+        nd=0
+        while [[ $ne -lt $noOfEasy || $nm -lt $noOfMed || $nh -lt $noOfHard ]]; do
+                if [[ "${difficultyOrder[nd]}" == "e" ]]; then
+                        selectedWords+=("${easySelectedWords[ne]}")
+                        ((ne++))
+                elif [[ "${difficultyOrder[nd]}" == "m" ]]; then
+                        selectedWords+=("${medSelectedWords[nm]}")
+                        ((nm++))
+                else
+                        selectedWords+=("${hardSelectedWords[nh]}")
+                        ((nh++))
+                fi
 
-		((nd++))
-	done
+                ((nd++))
+        done
 
         targetText="${selectedWords[*]}"
 
@@ -185,7 +192,7 @@ while true; do
                                 n=${#typedText}
                                 originalChar="${targetText:$n:1}"
 
-                                echo -ne "\b\033[2m$originalChar\033[0m\b"
+                                echo -ne "\b$colourGrey$originalChar$colourReset\b"
                         fi
                         continue
                 fi
@@ -198,12 +205,12 @@ while true; do
                 targetChar="${targetText:$n:1}"
 
                 if [[ "$char" == "$targetChar" ]]; then
-                        echo -ne "\033[1;32m$targetChar\033[0m"
+                        echo -ne "$colourBoldGreen$targetChar$colourReset"
                 else
                         if [[ "$char" == " " ]]; then
-                                echo -ne "\033[41m \033[0m"
+                                echo -ne "$colourBgRed $colourReset"
                         else
-                                echo -ne "\033[1;31m$char\033[0m"
+                                echo -ne "$colourBoldRed$char$colourReset"
                         fi
                 fi
 
@@ -254,10 +261,10 @@ while true; do
         echo "                    Results                      "
         echo "                   ($difficulty)                 "
         echo "-------------------------------------------------"
-	printf "%-15s %4s %s\n" "Time taken:" "$timeTaken" "seconds"
-	printf "%-15s %4s %s\n" "Gross WPM:" "$grossWPM" "WPM"
-	printf "%-15s %4s %s\n" "Net WPM:" "$netWPM" "WPM"
-	printf "%-15s %4s%%\n"  "Accuracy:" "$accuracy"
+        printf "%-15s %4s %s\n" "Time taken:" "$timeTaken" "seconds"
+        printf "%-15s %4s %s\n" "Gross WPM:" "$grossWPM" "WPM"
+        printf "%-15s %4s %s\n" "Net WPM:" "$netWPM" "WPM"
+        printf "%-15s %4s%%\n"  "Accuracy:" "$accuracy"
         echo "-------------------------------------------------"
         echo ""
 
